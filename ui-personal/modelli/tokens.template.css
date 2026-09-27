@@ -1,0 +1,626 @@
+/* =============================================================
+   [NOME PROGETTO] — tokens.css
+   Design token centralizzati: TUTTI i valori di stile del
+   progetto vivono qui. Questo file va caricato PER PRIMO in ogni
+   pagina, prima di main.css e dei CSS di sezione.
+
+   REGOLA D'ORO: nei CSS delle pagine niente valori scritti a mano
+   (colori, px, durate, z-index). Solo var(--nome-token).
+   Serve un valore nuovo? Si aggiunge PRIMA qui, con un commento
+   che spiega a cosa serve, e poi si usa.
+
+   COME USARE QUESTO MODELLO (istruzioni per Claude):
+   - I valori segnati "SEGNAPOSTO" sono neutri e servono solo a
+     far funzionare il file: vanno sostituiti con quelli del
+     mini-piano approvato dall'utente.
+   - Le sezioni segnate "OPZIONALE" si eliminano se non servono.
+   - La sezione 22 (Linee guida) si compila a parole con le
+     decisioni del progetto: è la memoria del progetto.
+   - Cancellare questo blocco "COME USARE" nel file finale.
+
+   STRUTTURA:
+   0.  Livelli CSS (@layer) e schema colori
+   1.  Font
+   2.  Dimensioni testo
+   3.  Palette — sfondi e superfici
+   4.  Palette — accento
+   5.  Palette — stati
+   6.  Palette — testo
+   7.  Palette — pulsanti
+   8.  Palette — superfici del browser (focus, selezione, scrollbar)
+   9.  Ombre e overlay
+   10. Colori grafici                         (OPZIONALE)
+   11. Scale speciali (es. gravità 1-10)      (OPZIONALE)
+   12. Secondo tema                           (OPZIONALE)
+   13. Peso font
+   14. Line-height
+   15. Letter-spacing (tracking)
+   16. Scala spaziatura
+   17. Border-radius
+   18. Movimento — durate, curve, distanze
+   19. Z-index
+   20. Opacity — stati
+   21. Breakpoint (riferimento) e dimensioni ricorrenti
+   22. Linee guida del progetto (solo documentazione)
+   ============================================================= */
+
+
+/* =============================================================
+   0. LIVELLI CSS (@layer) E SCHEMA COLORI
+
+   PERCHÉ I LIVELLI: senza livelli, quando due regole si
+   contraddicono vince la più "specifica" o l'ultima caricata, e
+   capita che main.css scavalchi per sbaglio un CSS di sezione
+   (problema classico: "perché questa regola non si applica?").
+   Con @layer l'ordine di priorità lo decidiamo noi, una volta
+   sola, qui: il livello dichiarato PER ULTIMO vince, a prescindere
+   dalla specificità dei selettori.
+   Ogni file CSS del progetto mette le sue regole nel suo livello:
+     base.css      → @layer base { ... }
+     main.css      → @layer layout { ... }
+     <sezione>.css → @layer componenti { ... }
+   Supportato da tutti i browser dal 2022.
+   (ricerca: MDN @layer)
+
+   color-scheme dice al browser se la pagina è chiara o scura:
+   così scrollbar, campi dei form e controlli nativi usano i
+   colori giusti. Mettere "dark" se il tema principale è scuro.
+   ============================================================= */
+@layer reset, base, layout, componenti, utility;
+
+:root {
+    color-scheme: light;   /* SEGNAPOSTO — "light" oppure "dark" */
+}
+
+
+/* =============================================================
+   1. FONT
+   Massimo 2 famiglie (+ una monospazio solo per codice e dati).
+   Scelte nel mini-piano in base al soggetto del progetto.
+
+   DA NON USARE come scelta di default (troppo usati, vedi
+   tipografia.md): Inter, Roboto, Geist, Plus Jakarta Sans,
+   Space Grotesk, Fraunces, Instrument Serif.
+
+   I font vanno caricati in locale con @font-face e
+   font-display: swap (vedi tipografia.md), non da link esterni.
+
+   Il font di riserva (dopo la virgola) va scelto con proporzioni
+   simili al principale: così quando il font vero arriva il testo
+   non "salta". Per allinearli meglio si può usare size-adjust
+   nella @font-face di riserva (vedi tipografia.md, sezione 11).
+   ============================================================= */
+:root {
+    --font-display: system-ui, sans-serif;   /* SEGNAPOSTO — titoli */
+    --font-body:    system-ui, sans-serif;   /* SEGNAPOSTO — testo corrente, interfaccia */
+    --font-mono:    ui-monospace, monospace; /* SEGNAPOSTO — codice, numeri tabellari */
+}
+
+
+/* =============================================================
+   2. DIMENSIONI TESTO
+   In rem, non in px: così seguono lo zoom e le impostazioni del
+   browser dell'utente (1rem = 16px con le impostazioni standard).
+   Corpo del testo mai sotto 1rem. Mai sotto 0.75rem (12px) per
+   nessun testo, nemmeno etichette e badge.
+
+   Ogni gradino deve essere almeno 1.25 volte il precedente,
+   altrimenti la gerarchia non si vede (titoli e testo sembrano
+   uguali).
+   ============================================================= */
+:root {
+    --text-xs:  0.8125rem;  /* 13px — label, badge, meta */
+    --text-sm:  0.9375rem;  /* 15px — corpo secondario, tabelle */
+    --text-md:  1rem;       /* 16px — corpo principale */
+    --text-lg:  1.25rem;    /* 20px — titoli di card, sottotitoli */
+    --text-xl:  1.5625rem;  /* 25px — titoli di sezione */
+    --text-2xl: 2rem;       /* 32px — titolo di pagina, numeri grandi */
+
+    /* Titolo hero, fluido: cresce con la larghezza dello schermo
+       tra un minimo e un massimo. Massimo assoluto 6rem.
+       Regole (tipografia.md, sezione 2):
+       - il valore centrale contiene SEMPRE una parte in rem
+         (con i soli vw il testo non si ingrandisce con lo zoom);
+       - il massimo non supera 2.5 volte il minimo.
+       Qui: 2.5rem → 4.5rem = 1.8 volte, ok.
+       OPZIONALE: serve solo nelle pagine vetrina. */
+    --text-display: clamp(2.5rem, 5vw + 1rem, 4.5rem);
+}
+
+
+/* =============================================================
+   3. PALETTE — SFONDI E SUPERFICI
+   Dal più "basso" al più "alto": la pagina, poi le superfici
+   appoggiate sopra (card, pannelli), poi quelle in primo piano.
+
+   Niente nero puro #000000 e niente bianco puro sui fondi scuri.
+   Niente crema/avorio come scelta di default (vedi colore.md).
+
+   PALETTE GREZZA (OPZIONALE, per progetti grandi): si può
+   aggiungere prima di questa sezione una scala di tonalità
+   "grezze" (es. --grigio-50 … --grigio-900, --verde-500) e far
+   puntare i token qui sotto a quelle: --bg: var(--grigio-50).
+   I token di questa sezione si chiamano per il RUOLO (--bg,
+   --surface), quelli grezzi per il VALORE. Le pagine usano
+   SOLO i token di ruolo.
+   Per generare scale di tonalità uniformi conviene il formato
+   oklch(luminosità croma tinta): a parità di luminosità i
+   colori sembrano davvero ugualmente chiari, cosa che con HSL
+   non succede. (ricerca: Evil Martians, naming dei token)
+   ============================================================= */
+:root {
+    --bg:        #f4f5f6;   /* SEGNAPOSTO — sfondo della pagina */
+    --surface:   #ffffff;   /* SEGNAPOSTO — card, pannelli */
+    --surface-2: #eceef0;   /* SEGNAPOSTO — hover, zone secondarie */
+    --surface-3: #e2e5e8;   /* SEGNAPOSTO — elementi in primo piano (drawer, menu) */
+
+    --border:    #d5d9de;   /* SEGNAPOSTO — bordo standard */
+    --border-2:  #b9c0c8;   /* SEGNAPOSTO — bordo enfatizzato, hover */
+
+    /* Bordo dei CONTROLLI (campi, checkbox, bottoni ghost): deve
+       avere contrasto almeno 3:1 con lo sfondo (WCAG 1.4.11),
+       altrimenti chi vede poco non trova il campo. I bordi
+       decorativi (--border) invece possono essere tenui. */
+    --border-control: #7d8791;   /* SEGNAPOSTO — verificare 3:1 su --bg e --surface */
+}
+
+
+/* =============================================================
+   4. PALETTE — ACCENTO
+   UN SOLO colore d'accento, usato uguale in tutta la pagina:
+   azioni principali, link, elemento selezionato.
+   Saturazione contenuta. Niente viola/blu con bagliori "da AI".
+   ============================================================= */
+:root {
+    --accent:       #0f6b63;   /* SEGNAPOSTO — azione principale */
+    --accent-hover: color-mix(in oklch, var(--accent), black 12%);  /* un filo più scuro */
+
+    /* Versione tenue calcolata dall'accento: se cambi --accent,
+       cambia da sola. color-mix mescola due colori in una
+       proporzione (qui 10% accento, 90% trasparente). */
+    --accent-dim:   color-mix(in oklch, var(--accent) 10%, transparent);
+}
+
+
+/* =============================================================
+   5. PALETTE — STATI
+   Solo per comunicare uno stato (riuscito, attenzione, errore,
+   informazione). Mai usati come decorazione.
+   Le versioni -dim sono calcolate dal colore pieno con color-mix.
+   Il colore da solo non basta: ogni stato ha anche un'icona o
+   un testo (per chi non distingue i colori).
+   ============================================================= */
+:root {
+    --success:     #1f7a4d;               /* SEGNAPOSTO */
+    --success-dim: color-mix(in oklch, var(--success) 10%, transparent);
+
+    --warning:     #9a6200;               /* SEGNAPOSTO */
+    --warning-dim: color-mix(in oklch, var(--warning) 10%, transparent);
+
+    --error:       #b3261e;               /* SEGNAPOSTO */
+    --error-dim: color-mix(in oklch, var(--error) 10%, transparent);
+
+    --info:        #1d5f9e;               /* SEGNAPOSTO */
+    --info-dim: color-mix(in oklch, var(--info) 10%, transparent);
+}
+
+
+/* =============================================================
+   6. PALETTE — TESTO
+   Contrasto minimo sullo sfondo (vedi accessibilita.md):
+   - testo normale 4.5:1
+   - testo grande (da 24px, o da 19px in grassetto) 3:1
+   --text-faint NON va usato per testo da leggere: solo per
+   elementi disabilitati o decorativi.
+
+   Il "quasi nero" del testo si ricava dalla palette del progetto
+   (un grigio molto scuro leggermente tinto), non è un valore fisso.
+   ============================================================= */
+:root {
+    --text:       #1b1f24;   /* SEGNAPOSTO — testo principale */
+    --text-dim:   #464e57;   /* SEGNAPOSTO — testo secondario */
+    --text-muted: #5f6873;   /* SEGNAPOSTO — label, meta (verificare 4.5:1) */
+    --text-faint: #8a939d;   /* SEGNAPOSTO — solo disabilitati/decorativi */
+
+    --text-on-accent: #ffffff; /* SEGNAPOSTO — testo sopra un fondo --accent */
+}
+
+
+/* =============================================================
+   7. PALETTE — PULSANTI
+   Tre varianti (più danger se serve):
+   --btn-pri : primario — l'azione principale della schermata
+   --btn-sec : secondario — azione alternativa
+   --btn-gho : ghost — azione terziaria, reset, filtri
+   --btn-dan : danger — eliminazione (OPZIONALE)
+
+   Il ghost ha un bordo proprio (--btn-gho-brd): non usare mai un
+   colore semitrasparente come bordo, su certi sfondi scompare.
+   ============================================================= */
+:root {
+    --btn-pri-bg:  var(--accent);
+    --btn-pri-txt: var(--text-on-accent);
+
+    --btn-sec-bg:  var(--accent-dim);
+    --btn-sec-txt: var(--accent);
+
+    --btn-gho-bg:  transparent;
+    --btn-gho-txt: var(--text-dim);
+    --btn-gho-brd: var(--border-control);
+
+    --btn-dan-bg:  var(--error-dim);   /* OPZIONALE */
+    --btn-dan-txt: var(--error);       /* OPZIONALE */
+}
+
+
+/* =============================================================
+   8. PALETTE — SUPERFICI DEL BROWSER
+   Le parti che non disegniamo noi (anello di focus, testo
+   selezionato, cursore di scrittura, barre di scorrimento)
+   hanno colori di default del browser che non c'entrano con
+   il progetto. Dargli i colori della palette è il segnale più
+   economico che una pagina è stata curata.
+   Le regole che le usano stanno in main.css.
+   ============================================================= */
+:root {
+    --focus-ring:        var(--accent);   /* anello di focus, sempre visibile */
+    --focus-ring-width:  2px;
+    --focus-ring-offset: 2px;
+
+    --selection-bg:  var(--accent-dim);   /* testo selezionato */
+    --selection-txt: var(--text);
+    --caret:         var(--accent);       /* cursore nei campi di testo */
+
+    --scrollbar-thumb: var(--border-2);
+    --scrollbar-track: transparent;
+}
+/* In base.css queste righe collegano i token alle superfici:
+     :root        { accent-color: var(--accent);  ← checkbox, radio, slider nativi
+                    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
+     ::selection  { background: var(--selection-bg); color: var(--selection-txt); }
+     input, textarea { caret-color: var(--caret); }
+     :focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring);
+                      outline-offset: var(--focus-ring-offset); }  */
+
+
+/* =============================================================
+   9. OMBRE E OVERLAY
+   Un'ombra ha sempre uno spostamento verso il basso e una
+   sfocatura morbida. Niente aloni colorati senza spostamento
+   (sono decorazione, non profondità).
+   Una sola direzione di luce per tutto il progetto.
+   ============================================================= */
+:root {
+    --shadow-sm:      0 1px 2px rgb(20 24 28 / 0.08);    /* SEGNAPOSTO — elementi appena rialzati */
+    --shadow-card:    0 4px 16px rgb(20 24 28 / 0.08);   /* SEGNAPOSTO — card */
+    --shadow-overlay: 0 12px 32px rgb(20 24 28 / 0.16);  /* SEGNAPOSTO — menu, drawer, modali */
+
+    --overlay-bg: rgb(20 24 28 / 0.45);  /* SEGNAPOSTO — velo dietro drawer e modali */
+}
+
+
+/* =============================================================
+   10. COLORI GRAFICI — OPZIONALE
+   Colori dedicati alle serie dei grafici e ai chip di categoria.
+   NON usare --accent o i colori di stato per i grafici: quei
+   token hanno già un significato (e cambiano col tema).
+   Chart.js e simili non leggono var(--) da soli: leggere il
+   valore con getComputedStyle prima di passarlo al grafico.
+   ============================================================= */
+:root {
+    --chart-1: #0f6b63;   /* SEGNAPOSTO */
+    --chart-2: #b35c1e;   /* SEGNAPOSTO */
+    --chart-3: #4a5fa8;   /* SEGNAPOSTO */
+    --chart-4: #8a8f2a;   /* SEGNAPOSTO */
+    --chart-5: #a33a5c;   /* SEGNAPOSTO */
+    --chart-altri: #8a939d; /* SEGNAPOSTO — categoria "altri" */
+}
+
+
+/* =============================================================
+   11. SCALE SPECIALI — OPZIONALE
+   Esempio: una scala di gravità da 1 a 10, o livelli di
+   priorità. Sfumatura continua da un estremo all'altro.
+   Rinominare secondo il progetto.
+   ============================================================= */
+:root {
+    --scala-alto:  var(--error);     /* SEGNAPOSTO */
+    --scala-medio: var(--warning);   /* SEGNAPOSTO */
+    --scala-basso: var(--success);   /* SEGNAPOSTO */
+}
+
+
+/* =============================================================
+   12. SECONDO TEMA — OPZIONALE
+   Solo se l'utente ha chiesto entrambi i temi.
+   Si attiva aggiungendo la classe all'elemento <html> (es. via JS
+   con un interruttore). Qui si sovrascrivono SOLO i token che
+   cambiano: font, dimensioni, spaziature e forme restano uguali.
+
+   ATTENZIONE, la classe va su <html> e NON su <body>: i token
+   calcolati da altri token (es. --accent-dim, --btn-pri-bg, che
+   usano var(--accent)) vengono "risolti" sull'elemento dove sono
+   scritti, cioè :root = <html>. Se il tema cambiasse --accent solo
+   sul <body>, quei token resterebbero col colore del tema vecchio.
+   Mettendo la classe su <html>, tutto si ricalcola da solo.
+
+   Un tema scuro non è il chiaro "invertito": le superfici più in
+   alto sono PIÙ CHIARE (non più scure), e il testo chiaro su fondo
+   scuro vuole un filo più di interlinea e di spessore.
+
+   DUE MODI DI GESTIRE IL SECONDO TEMA:
+   A) Interruttore manuale (quello qui sotto): una classe su
+      <html>, cambiata da JS; la scelta va salvata in localStorage
+      e riapplicata al caricamento, prima che la pagina si veda
+      (altrimenti "lampeggia" il tema sbagliato).
+   B) Segue il sistema operativo: color-scheme: light dark nella
+      sezione 0 e colori scritti con light-dark(chiaro, scuro),
+      es. --bg: light-dark(#f4f5f6, #121518);
+      Niente JS, ma l'utente non può scegliere. (ricerca: MDN)
+   Si possono combinare: segue il sistema, con interruttore che
+   lo scavalca.
+   ============================================================= */
+:root.tema-alt {
+    --bg:        #121518;   /* SEGNAPOSTO */
+    --surface:   #1a1e22;   /* SEGNAPOSTO */
+    --surface-2: #22272c;   /* SEGNAPOSTO */
+    --surface-3: #2a3036;   /* SEGNAPOSTO */
+    --border:    #2f363d;   /* SEGNAPOSTO */
+    --border-2:  #414a53;   /* SEGNAPOSTO */
+    --border-control: #66707a;   /* SEGNAPOSTO — 3:1 sulle superfici scure */
+
+    --accent:     #4fb3a9;   /* SEGNAPOSTO — le versioni -dim e -hover si ricalcolano da sole */
+    /* Sul fondo scuro l'hover schiarisce invece di scurire */
+    --accent-hover: color-mix(in oklch, var(--accent), white 14%);
+
+    --text:       #e6e9ec;   /* SEGNAPOSTO */
+    --text-dim:   #b4bcc4;   /* SEGNAPOSTO */
+    --text-muted: #939ca6;   /* SEGNAPOSTO */
+    --text-faint: #69727c;   /* SEGNAPOSTO */
+    --text-on-accent: #0e1113;
+
+    --shadow-card:    0 4px 16px rgb(0 0 0 / 0.35);
+    --shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.5);
+    --overlay-bg:     rgb(0 0 0 / 0.6);
+
+    /* Dice al browser di usare controlli e scrollbar scuri */
+    color-scheme: dark;
+}
+
+
+/* =============================================================
+   13. PESO FONT
+   Almeno due gradini ben distinti tra testo e titoli.
+   Verificare che il font scelto abbia davvero questi pesi.
+   ============================================================= */
+:root {
+    --fw-regular:  400;   /* testo corrente */
+    --fw-medium:   500;   /* label, voci di menu */
+    --fw-semibold: 600;   /* sottotitoli, titoli di card */
+    --fw-bold:     700;   /* titoli, valori importanti */
+}
+
+
+/* =============================================================
+   14. LINE-HEIGHT
+   Corpo del testo tra 1.5 e 1.7: sotto 1.3 si legge male.
+   Righe lunghe vogliono più interlinea di quelle corte.
+   ============================================================= */
+:root {
+    --leading-tight:   1.1;   /* titoli grandi, numeri, badge */
+    --leading-snug:    1.3;   /* titoli su più righe */
+    --leading-normal:  1.55;  /* corpo del testo */
+    --leading-relaxed: 1.7;   /* testi lunghi da leggere */
+}
+
+
+/* =============================================================
+   15. LETTER-SPACING (TRACKING)
+   Negativo solo sui titoli grandi, mai sotto -0.04em (le
+   lettere si toccano). Positivo solo su etichette corte;
+   sul testo corrente mai oltre 0.05em.
+   ============================================================= */
+:root {
+    --tracking-tight:  -0.02em;   /* titoli grandi */
+    --tracking-normal: 0;         /* testo corrente */
+    --tracking-wide:   0.04em;    /* etichette corte, valori mono */
+}
+
+
+/* =============================================================
+   16. SCALA SPAZIATURA (padding / margin / gap)
+   Base 4px. Il ritmo nasce dal contrasto: spazi STRETTI dentro
+   un gruppo, spazi AMPI tra gruppi diversi. Più spazio sopra un
+   titolo che sotto (il titolo "appartiene" a ciò che segue).
+   Non usare lo stesso valore dappertutto.
+   ============================================================= */
+:root {
+    --space-1:  0.25rem;  /* 4px */
+    --space-2:  0.5rem;   /* 8px */
+    --space-3:  0.75rem;  /* 12px */
+    --space-4:  1rem;     /* 16px */
+    --space-5:  1.5rem;   /* 24px */
+    --space-6:  2rem;     /* 32px */
+    --space-7:  3rem;     /* 48px */
+    --space-8:  4rem;     /* 64px */
+    --space-9:  6rem;     /* 96px — tra sezioni, pagine vetrina */
+
+    /* Larghezza massima del contenuto e del testo */
+    --container-max: 75rem;  /* 1200px — contenitore della pagina */
+    --gutter: clamp(1rem, 4vw, 3rem);  /* margine laterale della pagina: 16px su telefono, fino a 48px */
+    --measure:       65ch;   /* righe di testo leggibili (45-75 caratteri) */
+}
+
+
+/* =============================================================
+   17. BORDER-RADIUS
+   UNA sola scala per tutto il progetto, decisa nel mini-piano.
+   Esempi di sistemi coerenti:
+   - tutto squadrato: 0 ovunque
+   - morbido: 8-16px ovunque
+   - misto documentato: es. pulsanti 6px, card 12px (scritto
+     nelle Linee guida e rispettato ovunque)
+   ============================================================= */
+:root {
+    --radius-none: 0;
+    --radius-sm:   4px;    /* SEGNAPOSTO — input, chip */
+    --radius-md:   8px;    /* SEGNAPOSTO — pulsanti, card */
+    --radius-lg:   12px;   /* SEGNAPOSTO — pannelli grandi */
+    --radius-full: 999px;  /* elementi circolari: pallini di stato, avatar */
+}
+
+
+/* =============================================================
+   18. MOVIMENTO — durate, curve, distanze
+   Livello di animazione scelto con l'utente: [NESSUNA / MISURATA / RICCA / 3D IMMERSIVA]
+   (da scrivere qui e nelle Linee guida).
+
+   - Curva standard: decelerazione morbida. Mai rimbalzi.
+   - L'uscita è più veloce dell'entrata.
+   - Nei CSS elencare sempre le proprietà animate
+     (transition: opacity ..., transform ...), MAI "transition: all".
+   - Animare solo transform e opacity, salvo motivi precisi
+     (vedi movimento.md).
+   ============================================================= */
+:root {
+    --duration-instant: 120ms;  /* feedback immediato: premuto, spunta */
+    --duration-fast:    200ms;  /* hover, cambi di stato */
+    --duration-base:    300ms;  /* aperture di menu, drawer, overlay */
+    --duration-slow:    600ms;  /* il momento curato (entrata hero) */
+
+    --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);  /* entrate: arriva e rallenta */
+    --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);  /* uscite: parte piano, esce veloce */
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* spostamenti da un punto all'altro */
+
+    /* Di quanto si sposta un elemento quando entra.
+       Usarlo così: transform: translateY(var(--motion-distance)); */
+    --motion-distance: 12px;
+}
+
+/* "Riduci movimento" attivo nel sistema dell'utente:
+   gli spostamenti si azzerano, ma dissolvenze e cambi di colore
+   restano (brevi), perché confermano che un'azione è avvenuta.
+   Meno movimento, non zero feedback. */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --motion-distance: 0px;
+        --duration-slow:   200ms;
+        --duration-base:   150ms;
+    }
+}
+
+
+/* =============================================================
+   19. Z-INDEX
+   Gerarchia fissa di livelli. Nessun numero scritto a mano nei
+   CSS delle pagine. Nuovo livello = nuova riga qui, con commento.
+   ============================================================= */
+:root {
+    --z-base:     0;
+    --z-sticky:   100;    /* intestazioni e barre fisse */
+    --z-dropdown: 200;    /* menu a tendina, tooltip */
+    --z-overlay:  1000;   /* velo dietro drawer e modali */
+    --z-drawer:   1001;   /* drawer, pannelli laterali */
+    --z-modal:    1002;   /* finestre modali */
+    --z-toast:    1100;   /* notifiche temporanee */
+    --z-skip:     1200;   /* link "vai al contenuto", sopra tutto quando riceve il focus */
+}
+
+
+/* =============================================================
+   20. OPACITY — stati
+   ============================================================= */
+:root {
+    --opacity-hover:    0.85;  /* hover su pulsanti pieni */
+    --opacity-muted:    0.6;   /* elementi attenuati, ignorati */
+    --opacity-disabled: 0.4;   /* controlli disabilitati */
+}
+
+
+/* =============================================================
+   21. BREAKPOINT E DIMENSIONI RICORRENTI
+   I breakpoint NON funzionano dentro @media come variabili
+   (limite del CSS): qui sono solo riferimento, da ricopiare
+   uguali nelle @media. Non inventarne di nuovi.
+   ============================================================= */
+:root {
+    --bp-sm: 640px;    /* sotto: telefono, tutto a una colonna */
+    --bp-md: 900px;    /* sotto: tablet */
+    --bp-lg: 1200px;   /* sopra: desktop largo */
+
+    /* Area cliccabile: WCAG 2.2 chiede almeno 24×24px (livello
+       AA); 44×44px è la misura consigliata per il touch. */
+    --touch-target: 44px;
+    --icon-sm:      16px;  /* icone nel testo */
+    --icon-md:      20px;  /* icone nei pulsanti */
+    --icon-lg:      24px;  /* icone isolate */
+    --dot-status:   8px;   /* pallini di stato */
+}
+
+
+/* =============================================================
+   22. LINEE GUIDA DEL PROGETTO
+   Queste righe NON producono CSS: sono la memoria delle
+   decisioni del progetto. Claude le legge per prime quando
+   riprende il lavoro. Compilarle dal mini-piano e aggiornarle
+   quando una decisione cambia.
+   ============================================================= */
+
+/*
+   PROGETTO
+   ────────
+   Soggetto: [cos'è]
+   Pubblico: [per chi]
+   Modalità: [vetrina / strumento / entrambe: quali pagine]
+   Stile:    [nessuno / soft / minimal / brutalist / riferimenti]
+   Tema:     [chiaro / scuro / entrambi]
+   Animazione: [nessuna / misurata / ricca / 3D immersiva] — momento curato: [quale]
+   Se 3D immersiva: schema [quale], versioni three [0.170.0] gsap [3.12.5] lenis [1.1.0] in js/vendor/
+
+
+   FORME
+   ─────
+   [Es. "Pulsanti e input 6px, card 12px, pallini di stato
+   circolari. Nessun'altra eccezione."]
+
+
+   PULSANTI
+   ────────
+   1. PRIMARIO: [quando si usa, aspetto, hover]
+   2. SECONDARIO: [...]
+   3. GHOST: [...]
+   Una sola azione primaria per schermata.
+
+
+   TRANSIZIONI
+   ───────────
+   [Es. "Hover: --duration-fast. Drawer: --duration-base con
+   --ease-out in entrata e --ease-in in uscita."]
+
+
+   Z-INDEX
+   ───────
+   [Eventuali regole speciali tra livelli, es. pannelli che
+   cambiano livello durante un'animazione.]
+
+
+   SEPARAZIONE FILE CSS/JS
+   ────────────────────────
+   - tokens.css   → variabili e linee guida (questo file)
+   - base.css     → reset leggero, elementi HTML di base, stili
+                    delle superfici del browser (sez. 8)
+                    — livello @layer base
+   - main.css     → layout generale, navigazione, parti comuni
+                    — livello @layer layout
+   - [sezione].css → una per sezione dell'interfaccia
+                    — livello @layer componenti
+   Nuove sezioni → nuovo file CSS dedicato.
+   Niente CSS o JS inline nell'HTML.
+
+
+   ECCEZIONI APPROVATE
+   ───────────────────
+   [Scelte che vanno contro le regole di default della skill,
+   approvate dall'utente, con il motivo. Es. "Chip in maiuscolo
+   con tracking largo: scelta del progetto, approvata il ..."]
+*/
