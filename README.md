@@ -8,8 +8,21 @@ Skill personali di Ivan per Claude Code.
 | `debug-personal` | Correggere gli errori trovando prima la causa vera |
 | `verifica-personal` | Non dire mai "fatto" senza una prova appena eseguita |
 
-Installazione: le cartelle vanno copiate in `%USERPROFILE%\.claude\skills\`
-(Windows) oppure `~/.claude/skills/` (Mac e Linux).
+## Installazione (Windows)
+
+Scarica [`installa-skill.bat`](installa-skill.bat) (pulsante "Download
+raw file") e aprilo con doppio clic. Installa o aggiorna:
+
+- le tre skill di questo repository;
+- le skill ufficiali di [GSAP](https://github.com/greensock/gsap-skills)
+  (senza quelle per React e altri framework);
+- le skill di [Three.js](https://github.com/cloudai-x/threejs-skills);
+- [code-review](https://github.com/anthroos/claude-code-review-skill).
+
+Toglie anche le vecchie skill ormai fuse in `ui-personal` (Taste, Web
+Design Guidelines, Frontend Design). Per aggiornare, basta rilanciarlo.
+
+Su Mac o Linux: copia le cartelle in `~/.claude/skills/`.
 
 ## Crediti
 
