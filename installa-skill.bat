@@ -154,7 +154,7 @@ goto :eof
 
 REM ============================================================
 REM  SUBROUTINE :archivio
-REM    %1 = nome breve della cartella temporanea (es. mie)
+REM    %1 = nome breve della cartella temporanea (es. gsap)
 REM    %2 = proprietario/repository su GitHub
 REM  Scarica lo zip e lo estrae con tar (incluso in Windows 10/11)
 REM ============================================================
