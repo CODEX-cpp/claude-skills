@@ -53,14 +53,18 @@ if not exist "%DEST%" mkdir "%DEST%"
 
 REM ============================================================
 REM  1-2. SCARICO ED ESTRAGGO GLI ARCHIVI
-REM  Formato:  call :archivio  <nome-breve>  <proprietario/repository>
+REM  Formato:  call :archivio  <nome-breve>  <proprietario/repository>  <cartella da estrarre>
 REM  GitHub offre ogni repository come zip all'indirizzo
 REM  codeload.github.com/<proprietario>/<repo>/zip/refs/heads/main
 REM  Lo zip contiene una cartella "<repo>-main" con tutto dentro.
+REM  Si estrae SOLO la cartella delle skill: nella radice di alcuni
+REM  repository ci sono "collegamenti simbolici" (es. CLAUDE.md che
+REM  rimanda ad AGENTS.md) che Windows non sa creare senza permessi
+REM  di amministratore, e che a noi non servono.
 REM ============================================================
 echo Scarico gli archivi...
-call :archivio gsap   greensock/gsap-skills
-call :archivio three  cloudai-x/threejs-skills
+call :archivio gsap   greensock/gsap-skills     gsap-skills-main/skills
+call :archivio three  cloudai-x/threejs-skills  threejs-skills-main/skills
 echo.
 
 
@@ -156,6 +160,7 @@ REM ============================================================
 REM  SUBROUTINE :archivio
 REM    %1 = nome breve della cartella temporanea (es. gsap)
 REM    %2 = proprietario/repository su GitHub
+REM    %3 = cartella dell'archivio da estrarre (il resto si ignora)
 REM  Scarica lo zip e lo estrae con tar (incluso in Windows 10/11)
 REM ============================================================
 :archivio
@@ -166,8 +171,9 @@ if errorlevel 1 (
     goto :eof
 )
 mkdir "%TMPDIR%\%~1"
-REM tar -x = estrai, -f = da questo file, -C = in questa cartella
-tar -xf "%TMPDIR%\%~1.zip" -C "%TMPDIR%\%~1"
+REM tar -x = estrai, -f = da questo file, -C = in questa cartella,
+REM e alla fine la sola cartella da estrarre
+tar -xf "%TMPDIR%\%~1.zip" -C "%TMPDIR%\%~1" "%~3"
 if errorlevel 1 (
     echo   [ERRORE] estrazione di %~2
     set /a ERRORI+=1
