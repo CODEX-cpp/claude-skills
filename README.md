@@ -8,19 +8,25 @@ Skill personali di Ivan per Claude Code.
 | `debug-personal` | Correggere gli errori trovando prima la causa vera |
 | `verifica-personal` | Non dire mai "fatto" senza una prova appena eseguita |
 
-## Installazione (Windows)
+## Installazione
 
-Scarica [`installa-skill.bat`](installa-skill.bat) (pulsante "Download
-raw file") e aprilo con doppio clic. Installa o aggiorna:
+**Le tre skill di questo repository** si caricano nell'account
+claude.ai (Impostazioni > Competenze > Aggiungi, uno zip per skill con
+dentro la cartella). Da lì si sincronizzano su tutti i PC e funzionano
+anche nelle chat e da telefono.
 
-- le tre skill di questo repository;
+**Le skill tecniche** (solo per Claude Code) si installano su ogni PC
+con [`installa-skill.bat`](installa-skill.bat) (pulsante "Download raw
+file", poi doppio clic):
+
 - le skill ufficiali di [GSAP](https://github.com/greensock/gsap-skills)
   (senza quelle per React e altri framework);
 - le skill di [Three.js](https://github.com/cloudai-x/threejs-skills);
 - [code-review](https://github.com/anthroos/claude-code-review-skill).
 
-Toglie anche le vecchie skill ormai fuse in `ui-personal` (Taste, Web
-Design Guidelines, Frontend Design). Per aggiornare, basta rilanciarlo.
+Lo script toglie anche le vecchie skill fuse in `ui-personal` (Taste,
+Web Design Guidelines, Frontend Design) e le eventuali copie locali
+delle tre skill di questo repository. Per aggiornare, basta rilanciarlo.
 
 Su Mac o Linux: copia le cartelle in `~/.claude/skills/`.
 

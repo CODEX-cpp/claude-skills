@@ -5,14 +5,19 @@ REM  Installa (o aggiorna) le skill di Claude Code nella cartella
 REM  globale delle skill:  %USERPROFILE%\.claude\skills\
 REM
 REM  Cosa fa:
-REM   1. scarica da GitHub tre archivi zip:
-REM        - le skill di Ivan (CODEX-cpp/claude-skills)
+REM   1. scarica da GitHub due archivi zip:
 REM        - le skill ufficiali di GSAP (greensock/gsap-skills)
 REM        - le skill di Three.js (cloudai-x/threejs-skills)
 REM   2. li estrae in una cartella temporanea
 REM   3. copia le skill scelte al loro posto (sostituendo le vecchie)
 REM   4. scarica code-review (un solo file)
-REM   5. toglie le vecchie skill ormai fuse in ui-personal
+REM   5. toglie le vecchie skill ormai fuse in ui-personal, e le
+REM      eventuali copie locali delle skill di Ivan
+REM
+REM  NOTA: ui-personal, debug-personal e verifica-personal NON si
+REM  installano qui. Si caricano una volta nell'account claude.ai
+REM  (Impostazioni > Competenze > Aggiungi) e si sincronizzano da
+REM  sole su tutti i PC. Una copia anche qui creerebbe doppioni.
 REM
 REM  - Funziona su Windows 10/11: curl e tar sono gia' inclusi
 REM  - Non serve Node.js, Git o altro
@@ -54,7 +59,6 @@ REM  codeload.github.com/<proprietario>/<repo>/zip/refs/heads/main
 REM  Lo zip contiene una cartella "<repo>-main" con tutto dentro.
 REM ============================================================
 echo Scarico gli archivi...
-call :archivio mie    CODEX-cpp/claude-skills
 call :archivio gsap   greensock/gsap-skills
 call :archivio three  cloudai-x/threejs-skills
 echo.
@@ -68,15 +72,6 @@ REM  cosi' i file tolti da GitHub spariscono anche dal PC.
 REM  Per escludere una skill: metti REM davanti alla sua riga.
 REM ============================================================
 echo Installo le skill...
-
-REM ---------- Le mie skill (CODEX-cpp/claude-skills) ----------
-set "MIE=%TMPDIR%\mie\claude-skills-main"
-REM Regole di design per siti e interfacce
-call :installa "%MIE%"  ui-personal
-REM Correggere gli errori trovando prima la causa
-call :installa "%MIE%"  debug-personal
-REM Mai "fatto" senza una prova appena eseguita
-call :installa "%MIE%"  verifica-personal
 
 REM ---------- GSAP, animazioni (ufficiali) ----------
 REM Escluse di proposito: gsap-react e gsap-frameworks (React,
@@ -123,10 +118,12 @@ REM ============================================================
 REM  5. TOLGO LE VECCHIE SKILL
 REM  Taste, Web Design Guidelines e Frontend Design sono state
 REM  fuse dentro ui-personal: tenerle creerebbe regole doppie.
+REM  Le skill di Ivan stanno nell'account claude.ai: le copie
+REM  locali (da versioni precedenti di questo script) si tolgono.
 REM  Si toglie solo se la cartella esiste.
 REM ============================================================
-echo Tolgo le vecchie skill fuse in ui-personal...
-for %%S in (design-taste-frontend design-taste-frontend-v1 redesign-existing-projects high-end-visual-design minimalist-ui industrial-brutalist-ui gpt-taste stitch-design-taste web-design-guidelines frontend-design) do (
+echo Tolgo le skill vecchie o doppie...
+for %%S in (ui-personal debug-personal verifica-personal design-taste-frontend design-taste-frontend-v1 redesign-existing-projects high-end-visual-design minimalist-ui industrial-brutalist-ui gpt-taste stitch-design-taste web-design-guidelines frontend-design) do (
     if exist "%DEST%\%%S" (
         rmdir /s /q "%DEST%\%%S"
         echo   [TOLTA]  %%S
