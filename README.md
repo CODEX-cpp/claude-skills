@@ -22,7 +22,9 @@ file", poi doppio clic):
 - le skill ufficiali di [GSAP](https://github.com/greensock/gsap-skills)
   (senza quelle per React e altri framework);
 - le skill di [Three.js](https://github.com/cloudai-x/threejs-skills);
-- [code-review](https://github.com/anthroos/claude-code-review-skill).
+- [code-review](https://github.com/anthroos/claude-code-review-skill);
+- [claude-council](https://github.com/amgadelgamal/claude-council): consiglio di sotto-agenti Claude, parte **solo** con `/claude-council` (costa molti token);
+- i plugin [ponytail](https://github.com/DietrichGebert/ponytail) (meno codice, piu' semplice) e [i-have-adhd](https://github.com/ayghri/i-have-adhd) (risposte con l'azione per prima, **sempre attiva**: per spegnerla cancella `~/.claude/.i-have-adhd-always`), installati a livello utente con `claude plugin`. I plugin non si sincronizzano con l'account: su ogni PC si rilancia lo script.
 
 Lo script toglie anche le vecchie skill fuse in `ui-personal` (Taste,
 Web Design Guidelines, Frontend Design) e le eventuali copie locali

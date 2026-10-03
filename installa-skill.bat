@@ -11,6 +11,8 @@ REM        - le skill di Three.js (cloudai-x/threejs-skills)
 REM   2. li estrae in una cartella temporanea
 REM   3. copia le skill scelte al loro posto (sostituendo le vecchie)
 REM   4. scarica code-review (un solo file)
+REM   4b. scarica la skill claude-council (parte solo a comando)
+REM   4c. installa i plugin ponytail e i-have-adhd (se trova Claude Code)
 REM   5. toglie le vecchie skill ormai fuse in ui-personal, e le
 REM      eventuali copie locali delle skill di Ivan
 REM
@@ -119,6 +121,50 @@ echo.
 
 
 REM ============================================================
+REM  4b. CLAUDE COUNCIL (skill che parte SOLO a comando)
+REM  Consiglio di sotto-agenti Claude che rispondono, si criticano
+REM  a vicenda e arrivano a una sintesi (amgadelgamal/claude-council,
+REM  licenza MIT). Si scaricano i 3 file e si aggiunge la riga
+REM  disable-model-invocation: cosi' parte solo quando scrivi
+REM  /claude-council, mai da sola. Costa molti token: usalo poco.
+REM ============================================================
+echo Scarico claude-council...
+call :council
+echo.
+
+
+REM ============================================================
+REM  4c. PLUGIN DI CLAUDE CODE (ponytail e i-have-adhd)
+REM  Non sono semplici skill: contengono hook, quindi si installano
+REM  col comando "claude plugin", a livello utente.
+REM   - ponytail: meno codice, soluzioni piu' semplici
+REM   - i-have-adhd: risposte con l'azione per prima. Resta SEMPRE
+REM     attiva grazie al file vuoto .i-have-adhd-always. Per
+REM     spegnerla per sempre: cancella quel file.
+REM  Se il comando "claude" non e' nel PATH (capita con l'app
+REM  desktop) si cerca l'eseguibile dentro l'app. Se non si trova,
+REM  si stampano i comandi da dare a mano.
+REM ============================================================
+echo Installo i plugin...
+set "CLAUDE="
+where claude >nul 2>&1 && set "CLAUDE=claude"
+if not defined CLAUDE (
+    for /f "delims=" %%F in ('dir /b /s "%APPDATA%\Claude\claude-code\claude.exe" 2^>nul') do set "CLAUDE=%%F"
+)
+if defined CLAUDE (
+    call :plugin DietrichGebert/ponytail ponytail@ponytail
+    call :plugin ayghri/i-have-adhd i-have-adhd@i-have-adhd
+    if not exist "%USERPROFILE%\.claude\.i-have-adhd-always" type nul > "%USERPROFILE%\.claude\.i-have-adhd-always"
+) else (
+    echo   [DA FARE A MANO] non trovo Claude Code. In Claude Code scrivi:
+    echo     /plugin marketplace add DietrichGebert/ponytail
+    echo     /plugin install ponytail@ponytail
+    echo     /plugin marketplace add ayghri/i-have-adhd
+    echo     /plugin install i-have-adhd@i-have-adhd
+)
+echo.
+
+REM ============================================================
 REM  5. TOLGO LE VECCHIE SKILL
 REM  Taste, Web Design Guidelines e Frontend Design sono state
 REM  fuse dentro ui-personal: tenerle creerebbe regole doppie.
@@ -201,6 +247,56 @@ REM una cartella, /Y non chiede conferme, /Q non elenca i file
 xcopy "%~1\%~2" "%DEST%\%~2" /E /I /Y /Q >nul
 if errorlevel 1 (
     echo   [ERRORE] copia di %~2
+    set /a ERRORI+=1
+) else (
+    echo   [OK]     %~2
+    set /a OK+=1
+)
+goto :eof
+
+REM ============================================================
+REM  SUBROUTINE :council
+REM  Scarica i 3 file di claude-council e li rende "solo a comando"
+REM ============================================================
+:council
+set "CDIR=%DEST%\claude-council"
+set "CBASE=https://raw.githubusercontent.com/amgadelgamal/claude-council/main"
+set "CFAIL="
+if exist "%CDIR%" rmdir /s /q "%CDIR%"
+mkdir "%CDIR%"
+for %%F in (SKILL.md council-workflow.js LICENSE) do (
+    curl -fsSL -o "%CDIR%\%%F" "%CBASE%/%%F"
+    if errorlevel 1 set "CFAIL=1"
+)
+if defined CFAIL (
+    echo   [ERRORE] download di claude-council
+    set /a ERRORI+=1
+    goto :eof
+)
+REM Aggiunge "disable-model-invocation: true" sotto la riga "name:"
+REM (UTF-8 senza BOM, altrimenti l'intestazione della skill si rompe)
+powershell -NoProfile -Command "$f='%CDIR%\SKILL.md'; $l=[IO.File]::ReadAllLines($f) | ForEach-Object { $_; if($_ -eq 'name: claude-council'){'disable-model-invocation: true'} }; [IO.File]::WriteAllLines($f,$l,(New-Object Text.UTF8Encoding($false)))"
+findstr /c:"disable-model-invocation: true" "%CDIR%\SKILL.md" >nul
+if errorlevel 1 (
+    echo   [ERRORE] claude-council: non sono riuscito a renderla solo a comando
+    set /a ERRORI+=1
+) else (
+    echo   [OK]     claude-council
+    set /a OK+=1
+)
+goto :eof
+
+
+REM ============================================================
+REM  SUBROUTINE :plugin
+REM    %1 = proprietario/repository del marketplace su GitHub
+REM    %2 = plugin@marketplace da installare
+REM ============================================================
+:plugin
+"!CLAUDE!" plugin marketplace add %~1 >nul 2>&1
+"!CLAUDE!" plugin install %~2 --scope user >nul 2>&1
+if errorlevel 1 (
+    echo   [ERRORE] %~2
     set /a ERRORI+=1
 ) else (
     echo   [OK]     %~2
