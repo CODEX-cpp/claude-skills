@@ -23,8 +23,9 @@ file", poi doppio clic):
   (senza quelle per React e altri framework);
 - le skill di [Three.js](https://github.com/cloudai-x/threejs-skills);
 - [code-review](https://github.com/anthroos/claude-code-review-skill);
-- [claude-council](https://github.com/amgadelgamal/claude-council): consiglio di sotto-agenti Claude, parte **solo** con `/claude-council` (costa molti token);
+- [`claude-council`](claude-council): copia di [amgadelgamal/claude-council](https://github.com/amgadelgamal/claude-council) (MIT) con i modelli Sonnet al posto di Opus (costa meno). Consiglio di sotto-agenti Claude, parte **solo** con `/claude-council` (costa molti token). Sta in questo repository;
 - [`security-audit`](security-audit): audit di sicurezza del codice, copia di [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) (MIT) con descrizione in italiano (NIS2, CVE, falle, vulnerabilità...) e regole d'uso locali. Sta in questo repository e si installa con lo script; da usare solo su copie locali del codice, mai su siti online;
+- i plugin di [`my-mods`](my-mods): `usage-band` (consumo di token), `rapportini`, `skill-trigger` (avvia da sole le skill giuste, comprese quelle di sicurezza) e `agent-modes`. In `usage-band` i dati d'uso e i titoli delle chat non sono pubblicati: parte con l'archivio vuoto;
 - i plugin [ponytail](https://github.com/DietrichGebert/ponytail) (meno codice, piu' semplice) e [i-have-adhd](https://github.com/ayghri/i-have-adhd) (risposte con l'azione per prima, **sempre attiva**: per spegnerla cancella `~/.claude/.i-have-adhd-always`), installati a livello utente con `claude plugin`. I plugin non si sincronizzano con l'account: su ogni PC si rilancia lo script.
 
 Lo script toglie anche le vecchie skill fuse in `ui-personal` (Taste,

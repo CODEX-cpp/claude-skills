@@ -1,0 +1,2 @@
+{ "name": "agent-modes", "version": "0.5.1", "description": "Fascia con 3 toggle (subagenti, workflow, team): il prossimo messaggio chiede a Claude di usare quella modalitÃ ", "types": "./types/index.d.ts" }
+

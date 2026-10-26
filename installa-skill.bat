@@ -5,14 +5,15 @@ REM  Installa (o aggiorna) le skill di Claude Code nella cartella
 REM  globale delle skill:  %USERPROFILE%\.claude\skills\
 REM
 REM  Cosa fa:
-REM   1. scarica da GitHub due archivi zip:
+REM   1. scarica da GitHub tre archivi zip:
 REM        - le skill ufficiali di GSAP (greensock/gsap-skills)
 REM        - le skill di Three.js (cloudai-x/threejs-skills)
+REM        - questo repository (CODEX-cpp/claude-skills): claude-council e security-audit
 REM   2. li estrae in una cartella temporanea
 REM   3. copia le skill scelte al loro posto (sostituendo le vecchie)
 REM   4. scarica code-review (un solo file)
-REM   4b. scarica la skill claude-council (parte solo a comando)
-REM   4c. installa i plugin ponytail e i-have-adhd (se trova Claude Code)
+REM   4b. installa la skill claude-council (versione di Ivan, parte solo a comando)
+REM   4c. installa i plugin ponytail, i-have-adhd e quelli di Ivan (my-mods), se trova Claude Code
 REM   4d. installa security-audit (audit di sicurezza, copia di Ivan in questo repository)
 REM   5. toglie le vecchie skill ormai fuse in ui-personal, e le
 REM      eventuali copie locali delle skill di Ivan
@@ -68,6 +69,7 @@ REM ============================================================
 echo Scarico gli archivi...
 call :archivio gsap   greensock/gsap-skills     gsap-skills-main/skills
 call :archivio three  cloudai-x/threejs-skills  threejs-skills-main/skills
+call :archivio mie    CODEX-cpp/claude-skills   claude-skills-main
 echo.
 
 
@@ -125,12 +127,14 @@ REM ============================================================
 REM  4b. CLAUDE COUNCIL (skill che parte SOLO a comando)
 REM  Consiglio di sotto-agenti Claude che rispondono, si criticano
 REM  a vicenda e arrivano a una sintesi (amgadelgamal/claude-council,
-REM  licenza MIT). Si scaricano i 3 file e si aggiunge la riga
-REM  disable-model-invocation: cosi' parte solo quando scrivi
-REM  /claude-council, mai da sola. Costa molti token: usalo poco.
+REM  licenza MIT). La versione installata e' quella di Ivan, nella
+REM  cartella claude-council di questo repository: modelli Sonnet
+REM  al posto di Opus (costa meno) e riga disable-model-invocation,
+REM  cosi' parte solo quando scrivi /claude-council, mai da sola.
+REM  Costa molti token: usalo poco.
 REM ============================================================
-echo Scarico claude-council...
-call :council
+echo Installo claude-council...
+call :installa "%TMPDIR%\mie\claude-skills-main"  claude-council
 echo.
 
 
@@ -143,17 +147,19 @@ REM  Sta in questo repository (cartella security-audit), non in
 REM  quello originale, perche' l'originale non ha le modifiche.
 REM  Serve Node.js solo per i due validatori dei report.
 REM ============================================================
-echo Scarico security-audit...
-call :archivio mie CODEX-cpp/claude-skills claude-skills-main/security-audit
+echo Installo security-audit...
 call :installa "%TMPDIR%\mie\claude-skills-main"  security-audit
 echo.
 
 
 REM ============================================================
-REM  4c. PLUGIN DI CLAUDE CODE (ponytail e i-have-adhd)
+REM  4c. PLUGIN DI CLAUDE CODE (ponytail, i-have-adhd e my-mods)
 REM  Non sono semplici skill: contengono hook, quindi si installano
 REM  col comando "claude plugin", a livello utente.
 REM   - ponytail: meno codice, soluzioni piu' semplici
+REM   - my-mods (cartella my-mods di questo repository): usage-band
+REM     (consumo token), rapportini, skill-trigger (avvia da sole le
+REM     skill giuste, comprese quelle di sicurezza) e agent-modes
 REM   - i-have-adhd: risposte con l'azione per prima. Resta SEMPRE
 REM     attiva grazie al file vuoto .i-have-adhd-always. Per
 REM     spegnerla per sempre: cancella quel file.
@@ -170,6 +176,10 @@ if not defined CLAUDE (
 if defined CLAUDE (
     call :plugin DietrichGebert/ponytail ponytail@ponytail
     call :plugin ayghri/i-have-adhd i-have-adhd@i-have-adhd
+    call :plugin CODEX-cpp/claude-skills usage-band@my-mods
+    call :plugin CODEX-cpp/claude-skills rapportini@my-mods
+    call :plugin CODEX-cpp/claude-skills skill-trigger@my-mods
+    call :plugin CODEX-cpp/claude-skills agent-modes@my-mods
     if not exist "%USERPROFILE%\.claude\.i-have-adhd-always" type nul > "%USERPROFILE%\.claude\.i-have-adhd-always"
 ) else (
     echo   [DA FARE A MANO] non trovo Claude Code. In Claude Code scrivi:
@@ -177,6 +187,11 @@ if defined CLAUDE (
     echo     /plugin install ponytail@ponytail
     echo     /plugin marketplace add ayghri/i-have-adhd
     echo     /plugin install i-have-adhd@i-have-adhd
+    echo     /plugin marketplace add CODEX-cpp/claude-skills
+    echo     /plugin install usage-band@my-mods
+    echo     /plugin install rapportini@my-mods
+    echo     /plugin install skill-trigger@my-mods
+    echo     /plugin install agent-modes@my-mods
 )
 echo.
 
@@ -266,38 +281,6 @@ if errorlevel 1 (
     set /a ERRORI+=1
 ) else (
     echo   [OK]     %~2
-    set /a OK+=1
-)
-goto :eof
-
-REM ============================================================
-REM  SUBROUTINE :council
-REM  Scarica i 3 file di claude-council e li rende "solo a comando"
-REM ============================================================
-:council
-set "CDIR=%DEST%\claude-council"
-set "CBASE=https://raw.githubusercontent.com/amgadelgamal/claude-council/main"
-set "CFAIL="
-if exist "%CDIR%" rmdir /s /q "%CDIR%"
-mkdir "%CDIR%"
-for %%F in (SKILL.md council-workflow.js LICENSE) do (
-    curl -fsSL -o "%CDIR%\%%F" "%CBASE%/%%F"
-    if errorlevel 1 set "CFAIL=1"
-)
-if defined CFAIL (
-    echo   [ERRORE] download di claude-council
-    set /a ERRORI+=1
-    goto :eof
-)
-REM Aggiunge "disable-model-invocation: true" sotto la riga "name:"
-REM (UTF-8 senza BOM, altrimenti l'intestazione della skill si rompe)
-powershell -NoProfile -Command "$f='%CDIR%\SKILL.md'; $l=[IO.File]::ReadAllLines($f) | ForEach-Object { $_; if($_ -eq 'name: claude-council'){'disable-model-invocation: true'} }; [IO.File]::WriteAllLines($f,$l,(New-Object Text.UTF8Encoding($false)))"
-findstr /c:"disable-model-invocation: true" "%CDIR%\SKILL.md" >nul
-if errorlevel 1 (
-    echo   [ERRORE] claude-council: non sono riuscito a renderla solo a comando
-    set /a ERRORI+=1
-) else (
-    echo   [OK]     claude-council
     set /a OK+=1
 )
 goto :eof

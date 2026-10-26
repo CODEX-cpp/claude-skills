@@ -1,0 +1,28 @@
+{
+  "name": "my-mods",
+  "owner": {
+    "name": "Ivan"
+  },
+  "plugins": [
+    {
+      "name": "usage-band",
+      "source": "./my-mods/plugins/usage-band",
+      "description": "Plan usage pill above the prompt and a monthly token dashboard"
+    },
+    {
+      "name": "rapportini",
+      "source": "./my-mods/plugins/rapportini",
+      "description": "Rapportino di lavoro dalla chat, con scelta del periodo e stile salvato"
+    },
+    {
+      "name": "skill-trigger",
+      "source": "./my-mods/plugins/skill-trigger",
+      "description": "Avvia da sola le skill giuste e tiene attiva la regola di verifica"
+    },
+    {
+      "name": "agent-modes",
+      "source": "./my-mods/plugins/agent-modes",
+      "description": "Fascia con toggle per i modi di subagenti"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{ "name": "skill-trigger", "version": "0.3.0", "description": "Fa partire da sola le skill giuste in base al messaggio, include la sicurezza (NIS2, CVE, falle) e tiene sempre attiva la regola 'prova prima di dire fatto'" }

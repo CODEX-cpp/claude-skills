@@ -1,0 +1,4 @@
+{ "name": "usage-band", "version": "0.13.1", "description": "Plan usage bars above the prompt, plus a monthly token dashboard pane", "types": "./types/index.d.ts" }
+
+
+
