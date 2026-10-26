@@ -13,6 +13,7 @@ REM   3. copia le skill scelte al loro posto (sostituendo le vecchie)
 REM   4. scarica code-review (un solo file)
 REM   4b. scarica la skill claude-council (parte solo a comando)
 REM   4c. installa i plugin ponytail e i-have-adhd (se trova Claude Code)
+REM   4d. installa security-audit (audit di sicurezza, copia di Ivan in questo repository)
 REM   5. toglie le vecchie skill ormai fuse in ui-personal, e le
 REM      eventuali copie locali delle skill di Ivan
 REM
@@ -130,6 +131,21 @@ REM  /claude-council, mai da sola. Costa molti token: usalo poco.
 REM ============================================================
 echo Scarico claude-council...
 call :council
+echo.
+
+
+REM ============================================================
+REM  4d. SECURITY-AUDIT (audit di sicurezza del codice)
+REM  Copia di cloudflare/security-audit-skill (licenza MIT) con le
+REM  modifiche di Ivan: descrizione in italiano con le parole di
+REM  sicurezza (NIS2, CVE, falla...) e una sezione "Uso locale".
+REM  Sta in questo repository (cartella security-audit), non in
+REM  quello originale, perche' l'originale non ha le modifiche.
+REM  Serve Node.js solo per i due validatori dei report.
+REM ============================================================
+echo Scarico security-audit...
+call :archivio mie CODEX-cpp/claude-skills claude-skills-main/security-audit
+call :installa "%TMPDIR%\mie\claude-skills-main"  security-audit
 echo.
 
 

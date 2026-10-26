@@ -24,6 +24,7 @@ file", poi doppio clic):
 - le skill di [Three.js](https://github.com/cloudai-x/threejs-skills);
 - [code-review](https://github.com/anthroos/claude-code-review-skill);
 - [claude-council](https://github.com/amgadelgamal/claude-council): consiglio di sotto-agenti Claude, parte **solo** con `/claude-council` (costa molti token);
+- [`security-audit`](security-audit): audit di sicurezza del codice, copia di [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) (MIT) con descrizione in italiano (NIS2, CVE, falle, vulnerabilità...) e regole d'uso locali. Sta in questo repository e si installa con lo script; da usare solo su copie locali del codice, mai su siti online;
 - i plugin [ponytail](https://github.com/DietrichGebert/ponytail) (meno codice, piu' semplice) e [i-have-adhd](https://github.com/ayghri/i-have-adhd) (risposte con l'azione per prima, **sempre attiva**: per spegnerla cancella `~/.claude/.i-have-adhd-always`), installati a livello utente con `claude plugin`. I plugin non si sincronizzano con l'account: su ogni PC si rilancia lo script.
 
 Lo script toglie anche le vecchie skill fuse in `ui-personal` (Taste,
@@ -38,6 +39,6 @@ Le regole sono state scritte confrontando e adattando skill pubbliche:
 Taste (tasteskill.dev), Frontend Design (Anthropic), Web Design
 Guidelines (Vercel), Impeccable (Paul Bakaus), Awesome Design Skills
 (bergside, MIT), gstack (Garry Tan, MIT), awwwards-3d (MIT),
-Superpowers (Jesse Vincent, MIT). Dove il materiale è ripreso in modo
+Superpowers (Jesse Vincent, MIT). `security-audit`: Cloudflare (MIT), licenza originale in `security-audit/LICENSE`. Dove il materiale è ripreso in modo
 diretto, il testo della licenza originale è nella cartella
 corrispondente (`LICENSE`).
